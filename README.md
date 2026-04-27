@@ -1,8 +1,11 @@
 🏢 Real Estate DAO - Integração Web3 e Smart Contracts
+
 📖 Visão Geral do Projeto
+
 Este projeto demonstra a criação e integração de um ecossistema completo de Finanças Descentralizadas (DeFi) e Governança (DAO) voltado para o mercado imobiliário (Real Estate). O objetivo principal foi validar a "Etapa 5" do desenvolvimento, garantindo que a emissão de ativos, a custódia em cofres de rendimento (Staking) e o poder de decisão dos investidores funcionem perfeitamente via Web3.
 
 Todo o desenvolvimento e os testes foram realizados em ambiente seguro de simulação (Remix VM), garantindo que a lógica financeira e de governança fosse estressada e validada antes de qualquer implementação em rede principal (Mainnet).
+
 🏗️ Arquitetura dos Smart Contracts
 O ecossistema é composto por três pilares fundamentais, representados por três Smart Contracts interligados:
 
