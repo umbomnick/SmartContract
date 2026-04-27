@@ -61,9 +61,7 @@ Objetivo: Transferir os ativos da carteira do usuário para o Smart Contract (tr
 Validação: A consulta ao mapeamento saldosStaking retornou o valor exato depositado, provando a comunicação inter-contratos com sucesso.
 
 Passo 5: Governança e Votação Democrática
+
 Criação da Proposta: Executei criarProposta com o tema "Aquisição Banco Master". Isso gerou o ID 0 na blockchain.
 
 Votação: Utilizei a função votar, passando o ID 0 e o voto true (A favor).
-
-O Grande Insight (Voto Proporcional): Ao consultar o resultado da proposta, o sistema registrou 5 votos a favor, mesmo eu tendo votado apenas uma vez. Isso ocorreu porque a arquitetura é meritocrática: eu havia depositado 5 tokens no Staking. A DAO leu meu saldo e atribuiu o peso equivalente (1 Token = 1 Voto).
-🛠️ Desafios Técnicos e Soluções (Troubleshooting)Durante o desenvolvimento e validação, enfrentei e documentei os seguintes cenários de erro da EVM (Ethereum Virtual Machine):Problema EncontradoCausa RaizSolução AplicadaErro no Cálculo de Recompensas (Revert)O modificador atualizarRecompensa tentava subtrair o block.timestamp de um valor zerado no primeiro depósito, causando falha matemática.Adicionada uma trava lógica (if (saldosStaking[_conta] > 0)) para que a recompensa só seja calculada a partir do segundo depósito/interação.Erro de "Saldo Insuficiente" (Decimais)Tentar depositar valores absolutos (ex: 1000) quando o token utiliza 18 casas decimais (1000 + 18 zeros).Ajuste na escala de envio, garantindo que o valor do Mint, do Approve e do Depósito estivessem na mesma proporção matemática.Delegação Indevida (EIP 7702)Acionamento acidental do botão "Authorize Delegation" na interface do Remix.Cancelamento da janela experimental e uso do campo nativo de deploy para o initialOwner.Timeout de Metadata no RemixO ambiente engasgou ao tentar compilar os metadados complexos das bibliotecas OpenZeppelin.Realização de um "Soft Reset" (F5) e alteração da versão da EVM de Cancun para Shanghai, otimizando a compilação local.
