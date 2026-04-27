@@ -1,57 +1,69 @@
-# Sample Hardhat 3 Beta Project (`mocha` and `ethers`)
+🏢 Real Estate DAO - Integração Web3 e Smart Contracts
+📖 Visão Geral do Projeto
+Este projeto demonstra a criação e integração de um ecossistema completo de Finanças Descentralizadas (DeFi) e Governança (DAO) voltado para o mercado imobiliário (Real Estate). O objetivo principal foi validar a "Etapa 5" do desenvolvimento, garantindo que a emissão de ativos, a custódia em cofres de rendimento (Staking) e o poder de decisão dos investidores funcionem perfeitamente via Web3.
 
-This project showcases a Hardhat 3 Beta project using `mocha` for tests and the `ethers` library for Ethereum interactions.
+Todo o desenvolvimento e os testes foram realizados em ambiente seguro de simulação (Remix VM), garantindo que a lógica financeira e de governança fosse estressada e validada antes de qualquer implementação em rede principal (Mainnet).
+🏗️ Arquitetura dos Smart Contracts
+O ecossistema é composto por três pilares fundamentais, representados por três Smart Contracts interligados:
 
-To learn more about the Hardhat 3 Beta, please visit the [Getting Started guide](https://hardhat.org/docs/getting-started#getting-started-with-hardhat-3). To share your feedback, join our [Hardhat 3 Beta](https://hardhat.org/hardhat3-beta-telegram-group) Telegram group or [open an issue](https://github.com/NomicFoundation/hardhat/issues/new) in our GitHub issue tracker.
+PropToken.sol (O Ativo):
 
-## Project Overview
+Contrato padrão ERC-20 com extensão Ownable.
 
-This example project includes:
+Responsável por representar as frações imobiliárias digitais.
 
-- A simple Hardhat configuration file.
-- Foundry-compatible Solidity unit tests.
-- TypeScript integration tests using `mocha` and ethers.js
-- Examples demonstrating how to connect to different types of networks, including locally simulating OP mainnet.
+Funções chave testadas: mint (emissão) e approve (permissão de gastos).
 
-## Usage
+StakingRealEstate.sol (O Cofre/Yield):
 
-### Running Tests
+Contrato de custódia com proteção contra ataques de reentrância (ReentrancyGuard).
 
-To run all the tests in the project, execute the following command:
+Recebe os tokens dos investidores e calcula recompensas baseadas no tempo de bloqueio (Stake).
 
-```shell
-npx hardhat test
-```
+Funções chave testadas: depositar, sacar e o modificador de cálculo de tempo.
 
-You can also selectively run the Solidity or `mocha` tests:
+GovernancaDAO.sol (A Democracia on-chain):
 
-```shell
-npx hardhat test solidity
-npx hardhat test mocha
-```
+Contrato que permite aos detentores de tokens decidirem o futuro do fundo imobiliário.
 
-### Make a deployment to Sepolia
+Utiliza o saldo de Stake para calcular o peso do voto (Voto Proporcional).
 
-This project includes an example Ignition module to deploy the contract. You can deploy this module to a locally simulated chain or to Sepolia.
+Funções chave testadas: criarProposta e votar.
+🚀 Fluxo de Execução e Integração Web3 (Passo a Passo)
+Abaixo está o ciclo de vida completo do ativo, desde a sua criação até o seu uso em uma votação, validando a integração entre os contratos.
 
-To run the deployment to a local chain:
+Passo 1: Deploy (Implantação)
+PropToken: Implantei o token informando a minha conta como initialOwner.
 
-```shell
-npx hardhat ignition deploy ignition/modules/Counter.ts
-```
+StakingRealEstate: Implantei o contrato de Staking, passando o endereço do PropToken no construtor. Isso criou o vínculo oficial entre o cofre e o ativo correto.
 
-To run the deployment to Sepolia, you need an account with funds to send the transaction. The provided Hardhat configuration includes a Configuration Variable called `SEPOLIA_PRIVATE_KEY`, which you can use to set the private key of the account you want to use.
+GovernancaDAO: Implantei a DAO vinculada aos saldos do ecossistema.
 
-You can set the `SEPOLIA_PRIVATE_KEY` variable using the `hardhat-keystore` plugin or by setting it as an environment variable.
+Passo 2: Emissão de Ativos (Mint)
+Ação: Utilizei a função mint no PropToken.
 
-To set the `SEPOLIA_PRIVATE_KEY` config variable using `hardhat-keystore`:
+Objetivo: Criar liquidez inicial, simulando a tokenização de um imóvel e enviando os tokens para a carteira do investidor (Account).
 
-```shell
-npx hardhat keystore set SEPOLIA_PRIVATE_KEY
-```
+Validação: Verificado através da função balanceOf, confirmando o recebimento dos fundos.
 
-After setting the variable, you can run the deployment with the Sepolia network:
+Passo 3: Autorização de Custódia (Approve) - A Chave de Segurança
+Ação: Utilizei a função approve no PropToken.
 
-```shell
-npx hardhat ignition deploy --network sepolia ignition/modules/Counter.ts
-```
+Objetivo: Autorizar o contrato de Staking (no campo spender) a movimentar meus tokens.
+
+Lógica Aprendida: Na Web3, contratos não podem "puxar" fundos da carteira do usuário sem permissão explícita (Padrão ERC-20 Allowance). Sem este passo, o depósito falha.
+
+Passo 4: O Stake (Depositar)
+Ação: Chamei a função depositar no StakingRealEstate.
+
+Objetivo: Transferir os ativos da carteira do usuário para o Smart Contract (transferFrom).
+
+Validação: A consulta ao mapeamento saldosStaking retornou o valor exato depositado, provando a comunicação inter-contratos com sucesso.
+
+Passo 5: Governança e Votação Democrática
+Criação da Proposta: Executei criarProposta com o tema "Aquisição Banco Master". Isso gerou o ID 0 na blockchain.
+
+Votação: Utilizei a função votar, passando o ID 0 e o voto true (A favor).
+
+O Grande Insight (Voto Proporcional): Ao consultar o resultado da proposta, o sistema registrou 5 votos a favor, mesmo eu tendo votado apenas uma vez. Isso ocorreu porque a arquitetura é meritocrática: eu havia depositado 5 tokens no Staking. A DAO leu meu saldo e atribuiu o peso equivalente (1 Token = 1 Voto).
+🛠️ Desafios Técnicos e Soluções (Troubleshooting)Durante o desenvolvimento e validação, enfrentei e documentei os seguintes cenários de erro da EVM (Ethereum Virtual Machine):Problema EncontradoCausa RaizSolução AplicadaErro no Cálculo de Recompensas (Revert)O modificador atualizarRecompensa tentava subtrair o block.timestamp de um valor zerado no primeiro depósito, causando falha matemática.Adicionada uma trava lógica (if (saldosStaking[_conta] > 0)) para que a recompensa só seja calculada a partir do segundo depósito/interação.Erro de "Saldo Insuficiente" (Decimais)Tentar depositar valores absolutos (ex: 1000) quando o token utiliza 18 casas decimais (1000 + 18 zeros).Ajuste na escala de envio, garantindo que o valor do Mint, do Approve e do Depósito estivessem na mesma proporção matemática.Delegação Indevida (EIP 7702)Acionamento acidental do botão "Authorize Delegation" na interface do Remix.Cancelamento da janela experimental e uso do campo nativo de deploy para o initialOwner.Timeout de Metadata no RemixO ambiente engasgou ao tentar compilar os metadados complexos das bibliotecas OpenZeppelin.Realização de um "Soft Reset" (F5) e alteração da versão da EVM de Cancun para Shanghai, otimizando a compilação local.
